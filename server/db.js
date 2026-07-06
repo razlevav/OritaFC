@@ -6,13 +6,20 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // DATA_DIR מאפשר להצביע על תיקייה חיצונית (למשל דיסק מתמיד בענן) בלי לשנות קוד.
 const DATA_DIR = process.env.DATA_DIR || __dirname
 const DATA_FILE = path.join(DATA_DIR, 'data.json')
+// קובץ הזרע המגיע יחד עם הקוד (הנתונים המקומיים העדכניים בזמן ה-deploy הראשון).
+const SEED_FILE = path.join(__dirname, 'data.json')
 
 const EMPTY_STATE = { ingredients: [], preparedItems: [], dishes: [] }
 
 function ensureDataFile() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true })
   if (!fs.existsSync(DATA_FILE)) {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(EMPTY_STATE, null, 2), 'utf-8')
+    // בפעם הראשונה על דיסק חדש (בענן) — מתחילים מהנתונים שהיו מקומית בזמן ה-deploy, לא מריק.
+    if (DATA_FILE !== SEED_FILE && fs.existsSync(SEED_FILE)) {
+      fs.copyFileSync(SEED_FILE, DATA_FILE)
+    } else {
+      fs.writeFileSync(DATA_FILE, JSON.stringify(EMPTY_STATE, null, 2), 'utf-8')
+    }
   }
 }
 

@@ -36,10 +36,12 @@ export function computeIngredientDerived(ingredient) {
 // פותר את העלות ליחידת בסיס עבור רכיב בתוך מתכון (מרכיב גלם, פריט מוכן/רוטב, או פריט ידני חד-פעמי).
 export function resolveComponentUnit(component, context) {
   if (component.type === 'manual') {
+    // פריט ידני חד-פעמי מחושב באותו אופן כמו מרכיב גלם: מחיר לכמות רכישה → עלות ליחידת בסיס.
+    const { baseUnit, baseUnitCost } = computeIngredientDerived(component)
     return {
       name: component.name || '(פריט ידני ללא שם)',
-      baseUnit: component.unit || '',
-      baseUnitCost: Number(component.unitCost) || 0,
+      baseUnit,
+      baseUnitCost,
       missing: false,
     }
   }

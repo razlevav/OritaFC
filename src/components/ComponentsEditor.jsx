@@ -1,4 +1,4 @@
-import { computeComponentLine, formatMoney } from '../lib/calc'
+import { PURCHASE_UNITS, computeComponentLine, formatMoney } from '../lib/calc'
 
 let rowIdCounter = 0
 function newRowId() {
@@ -41,8 +41,9 @@ export default function ComponentsEditor({
         type,
         refId: '',
         name: current?.name || '',
-        unit: current?.unit || '',
-        unitCost: current?.unitCost ?? '',
+        purchaseQuantity: current?.purchaseQuantity ?? 100,
+        purchaseUnit: current?.purchaseUnit || 'גרם',
+        purchasePrice: current?.purchasePrice ?? '',
       })
     } else {
       updateRow(id, { type, refId: '' })
@@ -91,17 +92,67 @@ export default function ComponentsEditor({
                       <option value="manual">פריט חד-פעמי (ידני)</option>
                     </select>
                   </td>
-                  <td className="px-3 py-2 align-top">
-                    {isManual ? (
+
+                  {isManual ? (
+                    <td className="px-3 py-2 align-top" colSpan={4}>
                       <input
                         type="text"
                         placeholder="שם הפריט"
                         value={component.name || ''}
                         onChange={(e) => updateRow(component.id, { name: e.target.value })}
-                        className="w-full rounded-lg border border-brand-pinkLight bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
+                        className="w-full rounded-lg border border-brand-pinkLight bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink mb-2"
                       />
-                    ) : (
-                      <>
+                      <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                        <span className="text-brand-ink/50">עולה</span>
+                        <input
+                          type="number"
+                          step="any"
+                          min="0"
+                          placeholder="₪"
+                          value={component.purchasePrice ?? ''}
+                          onChange={(e) => updateRow(component.id, { purchasePrice: e.target.value })}
+                          className="w-16 rounded-lg border border-brand-pinkLight bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
+                        />
+                        <span className="text-brand-ink/50">₪ ל-</span>
+                        <input
+                          type="number"
+                          step="any"
+                          min="0"
+                          value={component.purchaseQuantity ?? ''}
+                          onChange={(e) => updateRow(component.id, { purchaseQuantity: e.target.value })}
+                          className="w-14 rounded-lg border border-brand-pinkLight bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
+                        />
+                        <select
+                          value={component.purchaseUnit || 'גרם'}
+                          onChange={(e) => updateRow(component.id, { purchaseUnit: e.target.value })}
+                          className="rounded-lg border border-brand-pinkLight bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
+                        >
+                          {PURCHASE_UNITS.map((u) => (
+                            <option key={u} value={u}>
+                              {u}
+                            </option>
+                          ))}
+                        </select>
+                        <span className="text-brand-ink/40 mx-1">|</span>
+                        <span className="text-brand-ink/50">בשימוש במנה:</span>
+                        <input
+                          type="number"
+                          step="any"
+                          min="0"
+                          value={component.quantity}
+                          onChange={(e) => updateRow(component.id, { quantity: e.target.value })}
+                          className="w-14 rounded-lg border border-brand-pinkLight bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
+                        />
+                        <span className="text-brand-ink/60">{line.baseUnit || '—'}</span>
+                        <span className="text-brand-ink/40 mx-1">·</span>
+                        <span className="text-brand-ink/50">
+                          ({formatMoney(line.baseUnitCost)} / {line.baseUnit || 'יחידה'})
+                        </span>
+                      </div>
+                    </td>
+                  ) : (
+                    <>
+                      <td className="px-3 py-2 align-top">
                         <select
                           value={component.refId}
                           onChange={(e) => updateRow(component.id, { refId: e.target.value })}
@@ -117,47 +168,22 @@ export default function ComponentsEditor({
                         {line.missing && component.refId && (
                           <p className="text-xs text-danger mt-1">המרכיב שנבחר נמחק</p>
                         )}
-                      </>
-                    )}
-                  </td>
-                  <td className="px-3 py-2 align-top">
-                    <input
-                      type="number"
-                      step="any"
-                      min="0"
-                      value={component.quantity}
-                      onChange={(e) => updateRow(component.id, { quantity: e.target.value })}
-                      className="w-full rounded-lg border border-brand-pinkLight bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-                    />
-                  </td>
-                  <td className="px-3 py-2 align-top">
-                    {isManual ? (
-                      <input
-                        type="text"
-                        placeholder='גרם / יחידה...'
-                        value={component.unit || ''}
-                        onChange={(e) => updateRow(component.id, { unit: e.target.value })}
-                        className="w-full rounded-lg border border-brand-pinkLight bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-                      />
-                    ) : (
-                      <span className="text-brand-ink/60">{line.baseUnit || '—'}</span>
-                    )}
-                  </td>
-                  <td className="px-3 py-2 align-top">
-                    {isManual ? (
-                      <input
-                        type="number"
-                        step="any"
-                        min="0"
-                        placeholder="₪"
-                        value={component.unitCost ?? ''}
-                        onChange={(e) => updateRow(component.id, { unitCost: e.target.value })}
-                        className="w-full rounded-lg border border-brand-pinkLight bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
-                      />
-                    ) : (
-                      <span className="text-brand-ink/60">{formatMoney(line.baseUnitCost)}</span>
-                    )}
-                  </td>
+                      </td>
+                      <td className="px-3 py-2 align-top">
+                        <input
+                          type="number"
+                          step="any"
+                          min="0"
+                          value={component.quantity}
+                          onChange={(e) => updateRow(component.id, { quantity: e.target.value })}
+                          className="w-full rounded-lg border border-brand-pinkLight bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-pink"
+                        />
+                      </td>
+                      <td className="px-3 py-2 align-top text-brand-ink/60">{line.baseUnit || '—'}</td>
+                      <td className="px-3 py-2 align-top text-brand-ink/60">{formatMoney(line.baseUnitCost)}</td>
+                    </>
+                  )}
+
                   <td className="px-3 py-2 align-top font-medium">{formatMoney(line.cost)}</td>
                   <td className="px-3 py-2 align-top text-center">
                     <button
@@ -191,7 +217,7 @@ export default function ComponentsEditor({
         + הוספת מרכיב
       </button>
       <p className="text-xs text-brand-ink/40 mt-2">
-        "פריט חד-פעמי" מאפשר להוסיף למנה הזו בלבד מרכיב שלא קיים בטבלת מרכיבי הגלם או ברטבים — לדוגמה משהו שקניתם באופן חריג. הוא לא נשמר לספרייה ולא יופיע במנות אחרות.
+        "פריט חד-פעמי" מאפשר להוסיף למנה הזו בלבד מרכיב שלא קיים בטבלת מרכיבי הגלם או ברטבים — מזינים כמה הוא עולה לכמות רכישה (לדוגמה ל-100 גרם, או ליחידת המשקל שרכשתם בה), וכמה נצרך בפועל במנה, והמערכת מחשבת את העלות בהתאם. הוא לא נשמר לספרייה ולא יופיע במנות אחרות.
       </p>
     </div>
   )

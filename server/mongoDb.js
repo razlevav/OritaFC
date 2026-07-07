@@ -1,10 +1,6 @@
-import fs from 'node:fs'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { MongoClient } from 'mongodb'
+import { seedData } from './seedData.js'
 
-const mongoDbDir = path.dirname(fileURLToPath(import.meta.url))
-const SEED_FILE = path.join(mongoDbDir, 'data.json')
 const SEED_COLLECTIONS = ['ingredients', 'preparedItems', 'dishes']
 
 let clientPromise = null
@@ -26,11 +22,10 @@ function ensureSeeded(rawDb) {
     seedPromise = (async () => {
       const counts = await Promise.all(SEED_COLLECTIONS.map((c) => rawDb.collection(c).countDocuments()))
       const isEmpty = counts.every((c) => c === 0)
-      if (!isEmpty || !fs.existsSync(SEED_FILE)) return
+      if (!isEmpty) return
 
-      const seed = JSON.parse(fs.readFileSync(SEED_FILE, 'utf-8'))
       for (const key of SEED_COLLECTIONS) {
-        const docs = (seed[key] || []).map((item) => ({ ...item, _id: item.id }))
+        const docs = (seedData[key] || []).map((item) => ({ ...item, _id: item.id }))
         if (docs.length) await rawDb.collection(key).insertMany(docs)
       }
     })()

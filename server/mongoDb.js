@@ -3,8 +3,8 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { MongoClient } from 'mongodb'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const SEED_FILE = path.join(__dirname, 'data.json')
+const mongoDbDir = path.dirname(fileURLToPath(import.meta.url))
+const SEED_FILE = path.join(mongoDbDir, 'data.json')
 const SEED_COLLECTIONS = ['ingredients', 'preparedItems', 'dishes']
 
 let clientPromise = null

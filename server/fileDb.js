@@ -2,12 +2,12 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const fileDbDir = path.dirname(fileURLToPath(import.meta.url))
 // DATA_DIR מאפשר להצביע על תיקייה חיצונית (למשל דיסק מתמיד בענן) בלי לשנות קוד.
-const DATA_DIR = process.env.DATA_DIR || __dirname
+const DATA_DIR = process.env.DATA_DIR || fileDbDir
 const DATA_FILE = path.join(DATA_DIR, 'data.json')
 // קובץ הזרע המגיע יחד עם הקוד (הנתונים המקומיים העדכניים בזמן ה-deploy הראשון).
-const SEED_FILE = path.join(__dirname, 'data.json')
+const SEED_FILE = path.join(fileDbDir, 'data.json')
 
 const EMPTY_STATE = { ingredients: [], preparedItems: [], dishes: [] }
 
